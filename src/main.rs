@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use pingora::http::RequestHeader;
 use pingora::prelude::{Opt, Session};
 use pingora::server::Server;
@@ -30,6 +31,7 @@ impl ProxyHttp for MyGateway {
 
     async fn upstream_request_filter(&self, _session: &mut Session, upstream_request: &mut RequestHeader, _ctx: &mut Self::CTX) -> pingora::Result<()> where Self::CTX: Send + Sync {
         info!("urf");
+        upstream_request.set_uri(http::uri::Uri::from_str("/bidRequest").unwrap());
         upstream_request.insert_header("X-API-KEY", "fwd-token")?;
         upstream_request.insert_header("Content-Type", "application/json")?;
         Ok(())
