@@ -18,15 +18,18 @@ impl ProxyHttp for MyGateway {
     fn new_ctx(&self) -> Self::CTX {}
 
     async fn request_filter(&self, session: &mut Session, _ctx: &mut Self::CTX) -> pingora::Result<bool> {
+        info!("rf");
         Ok(false)
     }
 
 
     async fn upstream_peer(&self, _session: &mut Session, _ctx: &mut Self::CTX) -> pingora::Result<Box<HttpPeer>> {
+        info!("up");
         Ok(Box::new(HttpPeer::new(("10.10.12.187", 8080), false, "*".to_string())))
     }
 
     async fn upstream_request_filter(&self, _session: &mut Session, upstream_request: &mut RequestHeader, _ctx: &mut Self::CTX) -> pingora::Result<()> where Self::CTX: Send + Sync {
+        info!("urf");
         upstream_request.insert_header("X-API-KEY", "fwd-token")?;
         upstream_request.insert_header("Content-Type", "application/json")?;
         Ok(())
@@ -39,6 +42,7 @@ impl ProxyHttp for MyGateway {
         _e: Option<&pingora_core::Error>,
         ctx: &mut Self::CTX,
     ) {
+        info!("logging");
         let response_code = session
             .response_written()
             .map_or(0, |resp| resp.status.as_u16());
